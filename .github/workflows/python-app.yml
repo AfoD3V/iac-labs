@@ -16,10 +16,6 @@ jobs:
   ci_cd:
 
     runs-on: ubuntu-latest
-
-    defaults:
-      run:
-        working-directory: ./example-app
     
     steps:
     - uses: actions/checkout@v3
