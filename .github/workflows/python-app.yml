@@ -29,7 +29,7 @@ jobs:
       with:
         python-version: "3.10"
     - name: Install dependencies
-      working-directory: ./path/to/your/example-app
+      working-directory: ./example-app
       run: poetry install
     - name: Test
       run: poetry run task test
