@@ -27,7 +27,7 @@ jobs:
       id: cached-poetry-dependencies
       uses: actions/cache@v3
       with:
-        path: /home/runner/work/iac-lab/example-app/.venv
+        path: ~/.venv
         key: ${{ runner.os }}-venv
         
     - name: Install Poetry Action
