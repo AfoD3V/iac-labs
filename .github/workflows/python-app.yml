@@ -59,7 +59,7 @@ jobs:
       uses: actions/cache@v3
       # Repository name inside <path>
       with:
-        path: /home/runner/work/iac-labs/example-app/.venv
+        path: ~/.venv
         key: ${{ runner.os }}-venv
     - name: Lint
       run: poetry run task lint
