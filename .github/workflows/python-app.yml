@@ -1,120 +1,165 @@
-# This workflow will install Python dependencies, run tests and lint with a single version of Python
-# For more information see: https://docs.github.com/en/actions/automating-builds-and-tests/building-and-testing-python
-
 name: Python application
-
+ 
 on:
   push:
     branches: [ "main" ]
   pull_request:
     branches: [ "main" ]
-
+ 
 permissions:
   contents: read
-
+ 
 jobs:
   build:
     runs-on: ubuntu-latest
-
     defaults:
       run:
         working-directory: ./example-app
-    
+    strategy:
+     matrix:
+         os: [ "ubuntu-latest", "windows-latest" ]
     steps:
-    - uses: actions/checkout@v3
-    
-    - name: Cache build venv
-      id: cached-poetry-dependencies
-      uses: actions/cache@v3
-      with:
-        path: /home/runner/work/iac-labs/example-app/.venv
-        key: ${{ runner.os }}-venv
-        
-    - name: Install Poetry Action
-      uses: snok/install-poetry@v1.3.4
-      with:
-        # The Poetry version to install
-        version: 1.7.1
-        
-    - name: Set up Python 3.10
-      uses: actions/setup-python@v3
-      with:
-        python-version: "3.10"
-        
-    - name: Install dependencies
-      if: steps.cached-poetry-dependencies.outputs.cache-hit != 'true'
-      run: poetry install --no-interaction --no-root
-
+        - uses: actions/checkout@v3
+        - name: Set up Python 3.10
+          uses: actions/setup-python@v3
+          with:
+            python-version: "3.10"
+        - name: Install Poetry Action
+          uses: snok/install-poetry@v1.3.4
+          with:
+            virtualenvs-create: true
+            virtualenvs-in-project: false
+            installer-parallel: true
+        - name: Install dependencies
+          run: |
+           poetry install --no-root
+        - name: Cache build venv
+          id: cached-poetry-dependencies
+          uses: actions/cache@v3
+          with:
+            path: /home/runner/.cache/pypoetry/virtualenvs
+            key: ${{ runner.os }}-venv
   lint:
-    needs: build
-    runs-on: ubuntu-latest
-
-    defaults:
-      run:
-        working-directory: ./example-app
-    
-    steps:
-    - name: Cache build venv
-      id: cached-poetry-dependencies
-      uses: actions/cache@v3
-      # Repository name inside <path>
-      with:
-        path: ~/.venv
-        key: ${{ runner.os }}-venv
-    - name: Lint
-      run: poetry run task lint
-        
+     runs-on: ubuntu-latest
+     defaults:
+       run:
+         working-directory: ./example-app
+     strategy:
+      matrix:
+          os: [ "ubuntu-latest", "windows-latest" ]
+     needs: build
+     steps:
+         - uses: actions/checkout@v3
+         - name: Set up Python 3.10
+           uses: actions/setup-python@v3
+           with:
+             python-version: "3.10"
+         - name: Install Poetry Action
+           uses: snok/install-poetry@v1.3.4
+           with:
+             virtualenvs-create: true
+             virtualenvs-in-project: false
+             installer-parallel: true
+         - name: Cache build venv
+           id: cached-poetry-dependencies
+           uses: actions/cache@v3
+           with:
+             path: /home/runner/.cache/pypoetry/virtualenvs
+             key: ${{ runner.os }}-venv
+         - name: Poetry lint
+           run: |
+             poetry run task lint
+ 
+ 
   formatter:
-    runs-on: ubuntu-latest
-
-    defaults:
-      run:
-        working-directory: ./example-app
-  
-    steps:
-    - name: Cache build venv
-      id: cached-poetry-dependencies
-      uses: actions/cache@v3
-      with:
-        path: /home/runner/work/<path>/example-app/.venv
-        key: ${{ runner.os }}-venv
-    - name: Formatting
-      run: poetry run task formatter
-    
-  
+     runs-on: ubuntu-latest
+     defaults:
+       run:
+         working-directory: ./example-app
+     strategy:
+      matrix:
+          os: [ "ubuntu-latest", "windows-latest" ]
+     needs: build
+     steps:
+         - uses: actions/checkout@v3
+         - name: Set up Python 3.10
+           uses: actions/setup-python@v3
+           with:
+             python-version: "3.10"
+         - name: Install Poetry Action
+           uses: snok/install-poetry@v1.3.4
+           with:
+             virtualenvs-create: true
+             virtualenvs-in-project: false
+             installer-parallel: true
+         - name: Cache build venv
+           id: cached-poetry-dependencies
+           uses: actions/cache@v3
+           with:
+             path: /home/runner/.cache/pypoetry/virtualenvs
+             key: ${{ runner.os }}-venv
+         - name: Poetry formatter
+           run: |
+             poetry run task formatter
   security:
-    runs-on: ubuntu-latest
+     runs-on: ubuntu-latest
+     defaults:
+       run:
+         working-directory: ./example-app
+     strategy:
+      matrix:
+          os: [ "ubuntu-latest", "windows-latest" ]
+     needs: build
+     steps:
+         - uses: actions/checkout@v3
+         - name: Set up Python 3.10
+           uses: actions/setup-python@v3
+           with:
+             python-version: "3.10"
+         - name: Install Poetry Action
+           uses: snok/install-poetry@v1.3.4
+           with:
+             virtualenvs-create: true
+             virtualenvs-in-project: false
+             installer-parallel: true
+         - name: Cache build venv
+           id: cached-poetry-dependencies
+           uses: actions/cache@v3
+           with:
+             path: /home/runner/.cache/pypoetry/virtualenvs
+             key: ${{ runner.os }}-venv
+         - name: Poetry security
+           run: |
+             poetry run task security 
 
-    defaults:
-      run:
-        working-directory: ./example-app
-  
-    steps:
-    - name: Cache build venv
-      id: cached-poetry-dependencies
-      uses: actions/cache@v3
-      with:
-        path: /home/runner/work/<path>/example-app/.venv
-        key: ${{ runner.os }}-venv
-    - name: Security
-      run: poetry run task security
 
-
-
-  unittest:
-    runs-on: ubuntu-latest
-
-    defaults:
-      run:
-        working-directory: ./example-app
-  
-    steps:
-    - name: Cache build venv
-      id: cached-poetry-dependencies
-      uses: actions/cache@v3
-      with:
-        path: /home/runner/work/<path>/example-app/.venv
-        key: ${{ runner.os }}-venv
-    - name: Test
-      run: poetry run task test
-
+  Test:
+     runs-on: ubuntu-latest
+     defaults:
+       run:
+         working-directory: ./example-app
+     strategy:
+      matrix:
+          os: [ "ubuntu-latest", "windows-latest" ]
+     needs: [lint, formatter, build, security]
+     steps:
+         - uses: actions/checkout@v3
+         - name: Set up Python 3.10
+           uses: actions/setup-python@v3
+           with:
+             python-version: "3.10"
+         - name: Install Poetry Action
+           uses: snok/install-poetry@v1.3.4
+           with:
+             virtualenvs-create: true
+             virtualenvs-in-project: false
+             installer-parallel: true
+         - name: Cache build venv
+           id: cached-poetry-dependencies
+           uses: actions/cache@v3
+           with:
+             path: /home/runner/.cache/pypoetry/virtualenvs
+             key: ${{ runner.os }}-venv
+         - name: Poetry test
+           run: |
+             poetry run task test
