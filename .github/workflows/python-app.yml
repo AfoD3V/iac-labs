@@ -13,8 +13,7 @@ permissions:
   contents: read
 
 jobs:
-  ci_cd:
-
+  build:
     runs-on: ubuntu-latest
 
     defaults:
@@ -23,23 +22,97 @@ jobs:
     
     steps:
     - uses: actions/checkout@v3
+    
+    - name: Cache build venv
+      id: cached-poetry-dependencies
+      uses: actions/cache@v3
+      with:
+        path: /home/runner/work/<path>/example-app/.venv
+        key: ${{ runner.os }}-venv
+        
     - name: Install Poetry Action
       uses: snok/install-poetry@v1.3.4
       with:
         # The Poetry version to install
         version: 1.7.1
+        
     - name: Set up Python 3.10
       uses: actions/setup-python@v3
       with:
         python-version: "3.10"
+        
     - name: Install dependencies
       if: steps.cached-poetry-dependencies.outputs.cache-hit != 'true'
       run: poetry install --no-interaction --no-root
-    - name: Test
-      run: poetry run task test
+
+  lint:
+    runs-on: ubuntu-latest
+
+    defaults:
+      run:
+        working-directory: ./example-app
+    
+    steps:
+    - name: Cache build venv
+      id: cached-poetry-dependencies
+      uses: actions/cache@v3
+      with:
+        path: /home/runner/work/<path>/example-app/.venv
+        key: ${{ runner.os }}-venv
     - name: Lint
       run: poetry run task lint
+        
+  formatter:
+    runs-on: ubuntu-latest
+
+    defaults:
+      run:
+        working-directory: ./example-app
+  
+    steps:
+    - name: Cache build venv
+      id: cached-poetry-dependencies
+      uses: actions/cache@v3
+      with:
+        path: /home/runner/work/<path>/example-app/.venv
+        key: ${{ runner.os }}-venv
     - name: Formatting
       run: poetry run task formatter
+    
+  
+  security:
+    runs-on: ubuntu-latest
+
+    defaults:
+      run:
+        working-directory: ./example-app
+  
+    steps:
+    - name: Cache build venv
+      id: cached-poetry-dependencies
+      uses: actions/cache@v3
+      with:
+        path: /home/runner/work/<path>/example-app/.venv
+        key: ${{ runner.os }}-venv
     - name: Security
       run: poetry run task security
+
+
+
+  unittest:
+    runs-on: ubuntu-latest
+
+    defaults:
+      run:
+        working-directory: ./example-app
+  
+    steps:
+    - name: Cache build venv
+      id: cached-poetry-dependencies
+      uses: actions/cache@v3
+      with:
+        path: /home/runner/work/<path>/example-app/.venv
+        key: ${{ runner.os }}-venv
+    - name: Test
+      run: poetry run task test
+
